@@ -364,7 +364,7 @@ script:
       - switch.turn_off: mmwave_sensor
       - delay: 1s
       - uart.write: !lambda
-          std::string setL = "setLatency 2.5 " + str_sprintf("%.0f", id(latency_global));
+          std::string setL = "setLatency 0.1 " + str_sprintf("%.0f", id(latency_global));
           return std::vector<unsigned char>(setL.begin(), setL.end());
       - delay: 1s
       - switch.turn_on: mmwave_sensor
