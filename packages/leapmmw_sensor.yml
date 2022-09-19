@@ -1,5 +1,7 @@
 substitutions:
-  device_name: mmwave
+  device_name: mmwave-occupancy-sensor
+  friendly_name: MMWave Occupancy Sensor
+  hass_id: mmwave_occupancy_sensor
   ## FIXME: To be removed later. Would cause a breaking change.
   uart_tx_pin: GPIO19
   uart_rx_pin: GPIO18
@@ -27,9 +29,9 @@ uart:
 
 binary_sensor:
   - platform: gpio
-    name: mmwave_presence_detection
-    id: mmwave_presence_detection
-    device_class: motion
+    name: ${friendly_name} Occupancy
+    id: ${hass_id}_occupancy
+    device_class: occupancy
     pin:
       number: ${gpio_pin}
       mode: INPUT_PULLDOWN
@@ -46,48 +48,74 @@ binary_sensor:
     
 sensor:      
   - platform: template
-    name: target_1_distance_m
+    name: ${friendly_name} Target 1 Distance
+    unit_of_measurement: M
     id: target_1_distance_m # do not change
-    internal: true
+    disabled_by_default: true
+    entity_category: diagnostic
+    icon: mdi:target
     
   - platform: template
-    name: target_2_distance_m
+    name: ${friendly_name} Target 2 Distance
+    unit_of_measurement: M
     id: target_2_distance_m # do not change
-    internal: true
+    disabled_by_default: true
+    entity_category: diagnostic
+    icon: mdi:target
     
   - platform: template
-    name: target_3_distance_m
+    name: ${friendly_name} Target 3 Distance
+    unit_of_measurement: M
     id: target_3_distance_m # do not change
-    internal: true
+    disabled_by_default: true
+    entity_category: diagnostic
+    icon: mdi:target
     
   - platform: template
-    name: target_4_distance_m
+    name: ${friendly_name} Target 4 Distance
+    unit_of_measurement: M
     id: target_4_distance_m # do not change
-    internal: true
+    disabled_by_default: true
+    entity_category: diagnostic
+    icon: mdi:target
     
   - platform: template
-    name: target_1_SNR
+    name: ${friendly_name} Target 1 SNR
     id: target_1_SNR # do not change
-    internal: true
+    unit_of_measurement: dB
+    disabled_by_default: true
+    entity_category: diagnostic
+    icon: mdi:signal-distance-variant
 
   - platform: template
-    name: target_2_SNR
+    name: ${friendly_name} Target 2 SNR
     id: target_2_SNR # do not change
-    internal: true
+    unit_of_measurement: dB
+    disabled_by_default: true
+    entity_category: diagnostic
+    icon: mdi:signal-distance-variant
     
   - platform: template
-    name: target_3_SNR
+    name: ${friendly_name} Target 3 SNR
     id: target_3_SNR # do not change
-    internal: true
+    unit_of_measurement: dB
+    disabled_by_default: true
+    entity_category: diagnostic
+    icon: mdi:signal-distance-variant
     
   - platform: template
-    name: target_4_SNR
+    name: ${friendly_name} Target 4 SNR
     id: target_4_SNR # do not change
-    internal: true
+    unit_of_measurement: dB
+    disabled_by_default: true
+    entity_category: diagnostic
+    icon: mdi:signal-distance-variant
 
   - platform: template
-    name: num_targets
+    name: ${friendly_name} Targets
     id: num_targets # do not change
+    disabled_by_default: true
+    entity_category: diagnostic
     accuracy_decimals: 0
 
   - platform: custom
@@ -99,7 +127,10 @@ sensor:
       
 switch:
   - platform: safe_mode
-    name: use_safe_mode
+    name: ${friendly_name} Safe Mode
+    id: ${hass_id}_safe_made
+    entity_category: config
+    icon: mdi:seatbelt
 
   - platform: template
     name: show_target_stats
@@ -110,10 +141,11 @@ switch:
       - lambda: 'return clearTargets();'
 
   - platform: template
-    name: mmwave_sensor
+    name: ${friendly_name} Sensor State
     id: mmwave_sensor # do not change
     entity_category: config
     optimistic: true
+    icon: mdi:power
     turn_on_action:
       then:
         - script.execute: turn_on_mmwave_sensor
@@ -122,10 +154,11 @@ switch:
         - script.execute: turn_off_mmwave_sensor
 
   - platform: template
-    name: led
+    name: ${friendly_name} LED
     id: led  # do not change
     entity_category: config
     optimistic: true
+    icon: mdi:led-off
     turn_on_action:
       then:
         - if:
@@ -171,13 +204,14 @@ switch:
 
 number:
   - platform: template
-    name: distance
+    name: ${friendly_name} Max Distance
     id: distance # do not change
     entity_category: config
     min_value: 0.15
     max_value: 9.45
     step: 0.15
     unit_of_measurement: M
+    icon: mdi:arrow-expand-horizontal
     mode: box
     lambda: |-
       leapmmw(id(uart_bus)).getmmwConf("getRange");
@@ -206,10 +240,10 @@ number:
             else:
               - delay: 75ms
               - script.execute: set_distance 
-      
+
   - platform: template
-    name: latency
-    id: latency # do not change
+    name: ${friendly_name} On Latency
+    id: on_latency # do not change
     entity_category: config
     min_value: 1
     max_value: 600
@@ -217,6 +251,45 @@ number:
       leapmmw(id(uart_bus)).getmmwConf("getLatency");
       return {};
     step: 1
+    unit_of_measurement: s
+    icon: mdi:home-clock
+    mode: box
+    set_action:
+      then:
+        - globals.set:
+            id: on_latency_global
+            value: !lambda 'return x;'
+        - if:
+            condition:
+              or:
+                - script.is_running: turn_on_led
+                - script.is_running: turn_off_led
+                - script.is_running: set_distance
+                - script.is_running: set_latency
+                - script.is_running: set_sensitivity
+            then:
+              - script.wait: turn_on_led
+              - script.wait: turn_off_led
+              - script.wait: set_distance
+              - script.wait: set_latency
+              - script.wait: set_sensitivity
+              - delay: 50ms
+              - script.execute: set_latency
+            else:
+              - delay: 50ms
+              - script.execute: set_latency
+
+  - platform: template
+    name: ${friendly_name} Off Latency
+    id: off_latency # do not change
+    entity_category: config
+    min_value: 1
+    max_value: 600
+    lambda: |-
+      leapmmw(id(uart_bus)).getmmwConf("getLatency");
+      return {};
+    step: 1
+    icon: mdi:home-clock-outline
     unit_of_measurement: s
     mode: box
     set_action:
@@ -245,9 +318,10 @@ number:
               - script.execute: set_latency
 
   - platform: template
-    name: sensitivity
+    name: ${friendly_name} Sensitivity
     id: sensitivity # do not change
     entity_category: config
+    icon: mdi:motion-sensor
     min_value: 0
     max_value: 9
     lambda: |-
@@ -281,17 +355,20 @@ number:
 
 button:
   - platform: restart
-    name: Restart_ESP_${device_name}
+    name: ${friendly_name} Restart
+    id: ${hass_id}_restart
     entity_category: diagnostic
+    icon: mdi:restart
     on_press:
       - uart.write:
           id: uart_bus
           data: "resetSystem 0"
 
   - platform: template
-    name: factory_reset_mmwMCU_${device_name}
-    id: factory_reset_mmwMCU
+    name: ${friendly_name} Factory Reset Sensor
+    id: ${hass_id}_factory_reset_sensor
     entity_category: diagnostic
+    icon: mdi:restore-alert
     on_press:
       - switch.turn_off: mmwave_sensor
       - delay: 1s
@@ -302,7 +379,9 @@ button:
 globals:
   - id: distance_global
     type: float
-  - id: latency_global
+  - id: on_latency_global
+    type: float
+  - id: (off_latency_global
     type: float
   - id: sensitivity_global
     type: int
@@ -364,7 +443,7 @@ script:
       - switch.turn_off: mmwave_sensor
       - delay: 1s
       - uart.write: !lambda
-          std::string setL = "setLatency 0.1 " + str_sprintf("%.0f", id(latency_global));
+          std::string setL = "setLatency " + str_sprintf("%.0f", id(on_latency_global)) + " " + str_sprintf("%.0f", id(off_latency_global));
           return std::vector<unsigned char>(setL.begin(), setL.end());
       - delay: 1s
       - switch.turn_on: mmwave_sensor
