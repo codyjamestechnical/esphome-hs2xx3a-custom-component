@@ -30,7 +30,7 @@ uart:
 binary_sensor:
   - platform: gpio
     name: ${friendly_name} Occupancy
-    id: ${hass_id}_occupancy
+    id: mmwave_presence_detection
     device_class: occupancy
     pin:
       number: ${gpio_pin}
