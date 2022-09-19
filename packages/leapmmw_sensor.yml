@@ -381,7 +381,7 @@ globals:
     type: float
   - id: on_latency_global
     type: float
-  - id: (off_latency_global
+  - id: off_latency_global
     type: float
   - id: sensitivity_global
     type: int
