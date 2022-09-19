@@ -154,7 +154,7 @@ switch:
         - script.execute: turn_off_mmwave_sensor
 
   - platform: template
-    name: ${friendly_name} LED
+    name: led
     id: led  # do not change
     entity_category: config
     optimistic: true
@@ -204,7 +204,7 @@ switch:
 
 number:
   - platform: template
-    name: ${friendly_name} Max Distance
+    name: distance
     id: distance # do not change
     entity_category: config
     min_value: 0.15
