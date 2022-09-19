@@ -295,7 +295,7 @@ number:
     set_action:
       then:
         - globals.set:
-            id: latency_global
+            id: off_latency_global
             value: !lambda 'return x;'
         - if:
             condition:
