@@ -243,7 +243,7 @@ number:
 
   - platform: template
     name: ${friendly_name} On Latency
-    id: on_latency # do not change
+    id: onlatency # do not change
     entity_category: config
     min_value: 1
     max_value: 600
@@ -281,7 +281,7 @@ number:
 
   - platform: template
     name: ${friendly_name} Off Latency
-    id: off_latency # do not change
+    id: offlatency # do not change
     entity_category: config
     min_value: 1
     max_value: 600
