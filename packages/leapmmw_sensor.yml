@@ -242,7 +242,7 @@ number:
               - script.execute: set_distance 
 
   - platform: template
-    name: ${friendly_name} On Latency
+    name: onlatency
     id: onlatency # do not change
     entity_category: config
     min_value: 1
@@ -280,7 +280,7 @@ number:
               - script.execute: set_latency
 
   - platform: template
-    name: ${friendly_name} Off Latency
+    name: offlatency
     id: offlatency # do not change
     entity_category: config
     min_value: 1
@@ -318,7 +318,7 @@ number:
               - script.execute: set_latency
 
   - platform: template
-    name: ${friendly_name} Sensitivity
+    name: sensitivity
     id: sensitivity # do not change
     entity_category: config
     icon: mdi:motion-sensor
