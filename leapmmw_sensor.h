@@ -144,7 +144,7 @@ class leapmmw : public Component, public UARTDevice {
 
           // leapMMW:/>getLatency
           if (getline.substr(0, 20) == "leapMMW:/>getLatency" || getline.substr(0, 10) == "getLatency") {
-            std::string getOnLatency = line.substr(12, 2)
+            std::string getOnLatency = line.substr(8, 2)
             std::string getOffLatency = line.substr(15, 2);
             if (getLatency.empty()) {
               ESP_LOGD("custom", "Did not find a value for getLatency");
