@@ -150,8 +150,6 @@ class leapmmw : public Component, public UARTDevice {
               ESP_LOGD("custom", "Did not find a value for getLatency");
             } else {
               // ESP_LOGD("custom", "The value of getLatency is: %f", parse_number<float>(getLatency).value()); 
-              ESP_LOGD("custom", getline.substr(12, 2));
-              ESP_LOGD("custom", getline.substr(15,2));
               publishNumber("onlatency", parse_number<float>(getOnLatency).value());
               publishNumber("offlatency", parse_number<float>(getOffLatency).value());
             }
