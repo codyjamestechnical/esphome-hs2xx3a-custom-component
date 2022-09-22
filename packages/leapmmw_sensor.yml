@@ -1,7 +1,8 @@
 substitutions:
   device_name: mmwave-occupancy-sensor
   friendly_name: MMWave Occupancy Sensor
-  hass_id: mmwave_occupancy_sensor
+  comment: "DFRobot SEN0295 24GHz millimeter-wave radar sensor" # This shows in the UI only but it creates a better experience for the user.
+
   ## FIXME: To be removed later. Would cause a breaking change.
   uart_tx_pin: GPIO19
   uart_rx_pin: GPIO18
@@ -9,8 +10,14 @@ substitutions:
   gpio_pin: GPIO23
   header_file: leapmmw_sensor.h
 
+  # Device Information
+  device_make: "DFRobot"
+  device_model: "SEN0395"
+  esp_board: "WEMOS S2 Mini" # override for your own board
+
 esphome:
   name: ${device_name}
+  comment: ${comment}
   includes:
     - ${header_file}
 
@@ -128,7 +135,7 @@ sensor:
 switch:
   - platform: safe_mode
     name: ${friendly_name} Safe Mode
-    id: ${hass_id}_safe_made
+    id: use_safe_made
     entity_category: config
     icon: mdi:seatbelt
 
@@ -154,7 +161,7 @@ switch:
         - script.execute: turn_off_mmwave_sensor
 
   - platform: template
-    name: led
+    name: ${friendly_name} LED
     id: led # do not change
     entity_category: config
     optimistic: true
@@ -204,7 +211,7 @@ switch:
 
 number:
   - platform: template
-    name: distance
+    name: ${friendly_name} Max Distance
     id: distance # do not change
     entity_category: config
     min_value: 0.15
@@ -242,7 +249,7 @@ number:
               - script.execute: set_distance
 
   - platform: template
-    name: latency
+    name: ${friendly_name} Off Time
     id: latency # do not change
     entity_category: config
     min_value: 1
@@ -252,7 +259,7 @@ number:
       return {};
     step: 1
     unit_of_measurement: s
-    icon: mdi:home-clock
+    icon: mdi:home-clock-outline
     mode: box
     set_action:
       then:
@@ -280,7 +287,7 @@ number:
               - script.execute: set_latency
 
   - platform: template
-    name: sensitivity
+    name: ${friendly_name} Sensitivity
     id: sensitivity # do not change
     entity_category: config
     icon: mdi:motion-sensor
@@ -318,7 +325,7 @@ number:
 button:
   - platform: restart
     name: ${friendly_name} Restart
-    id: ${hass_id}_restart
+    id: restart
     entity_category: diagnostic
     icon: mdi:restart
     on_press:
@@ -328,7 +335,7 @@ button:
 
   - platform: template
     name: ${friendly_name} Factory Reset Sensor
-    id: ${hass_id}_factory_reset_sensor
+    id: factory_reset_mmwMCU
     entity_category: diagnostic
     icon: mdi:restore-alert
     on_press:
@@ -345,6 +352,44 @@ globals:
     type: float
   - id: sensitivity_global
     type: int
+
+text_sensor:
+  - platform: template
+    name: "${friendly_name} Make"
+    lambda: return {"${device_make}"};
+    icon: "mdi:watermark"
+    entity_category: diagnostic
+
+  - platform: template
+    name: "${friendly_name} Model"
+    lambda: return {"${device_model}"};
+    id: ${hass_id}_model
+    icon: "mdi:tag"
+    entity_category: diagnostic
+
+  - platform: template
+    name: "${friendly_name} ESP Board"
+    lambda: return {"${esp_board}"};
+    id: esp_board
+    icon: "mdi:chip"
+    entity_category: diagnostic
+
+  - platform: wifi_info
+    ip_address:
+      icon: mdi:ip-network
+      entity_category: diagnostic
+      name: ${friendly_name} IP Address
+      id: ip_address
+    ssid:
+      entity_category: diagnostic
+      name: ${friendly_name} SSID
+      id: ssid
+      icon: mdi:wifi-marker
+    mac_address:
+      entity_category: diagnostic
+      icon: mdi:network
+      name: ${friendly_name} Mac Address
+      id: mac_address
 
 script:
   - id: turn_on_mmwave_sensor
