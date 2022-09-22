@@ -45,8 +45,8 @@ binary_sensor:
                 state: 0
             - lambda: |-
                 return clearTargets();
-    
-sensor:      
+
+sensor:
   - platform: template
     name: ${friendly_name} Target 1 Distance
     unit_of_measurement: M
@@ -54,7 +54,7 @@ sensor:
     disabled_by_default: true
     entity_category: diagnostic
     icon: mdi:target
-    
+
   - platform: template
     name: ${friendly_name} Target 2 Distance
     unit_of_measurement: M
@@ -62,7 +62,7 @@ sensor:
     disabled_by_default: true
     entity_category: diagnostic
     icon: mdi:target
-    
+
   - platform: template
     name: ${friendly_name} Target 3 Distance
     unit_of_measurement: M
@@ -70,7 +70,7 @@ sensor:
     disabled_by_default: true
     entity_category: diagnostic
     icon: mdi:target
-    
+
   - platform: template
     name: ${friendly_name} Target 4 Distance
     unit_of_measurement: M
@@ -78,7 +78,7 @@ sensor:
     disabled_by_default: true
     entity_category: diagnostic
     icon: mdi:target
-    
+
   - platform: template
     name: ${friendly_name} Target 1 SNR
     id: target_1_SNR # do not change
@@ -94,7 +94,7 @@ sensor:
     disabled_by_default: true
     entity_category: diagnostic
     icon: mdi:signal-distance-variant
-    
+
   - platform: template
     name: ${friendly_name} Target 3 SNR
     id: target_3_SNR # do not change
@@ -102,7 +102,7 @@ sensor:
     disabled_by_default: true
     entity_category: diagnostic
     icon: mdi:signal-distance-variant
-    
+
   - platform: template
     name: ${friendly_name} Target 4 SNR
     id: target_4_SNR # do not change
@@ -124,7 +124,7 @@ sensor:
       App.register_component(s);
       return {};
     sensors:
-      
+
 switch:
   - platform: safe_mode
     name: ${friendly_name} Safe Mode
@@ -138,7 +138,7 @@ switch:
     optimistic: true
     internal: true
     on_turn_off:
-      - lambda: 'return clearTargets();'
+      - lambda: "return clearTargets();"
 
   - platform: template
     name: ${friendly_name} Sensor State
@@ -155,7 +155,7 @@ switch:
 
   - platform: template
     name: led
-    id: led  # do not change
+    id: led # do not change
     entity_category: config
     optimistic: true
     icon: mdi:led-off
@@ -220,7 +220,7 @@ number:
       then:
         - globals.set:
             id: distance_global
-            value: !lambda 'return x;'
+            value: !lambda "return x;"
         - if:
             condition:
               or:
@@ -239,11 +239,11 @@ number:
               - script.execute: set_distance
             else:
               - delay: 75ms
-              - script.execute: set_distance 
+              - script.execute: set_distance
 
   - platform: template
-    name: onlatency
-    id: onlatency # do not change
+    name: latency
+    id: latency # do not change
     entity_category: config
     min_value: 1
     max_value: 600
@@ -257,46 +257,8 @@ number:
     set_action:
       then:
         - globals.set:
-            id: on_latency_global
-            value: !lambda 'return x;'
-        - if:
-            condition:
-              or:
-                - script.is_running: turn_on_led
-                - script.is_running: turn_off_led
-                - script.is_running: set_distance
-                - script.is_running: set_latency
-                - script.is_running: set_sensitivity
-            then:
-              - script.wait: turn_on_led
-              - script.wait: turn_off_led
-              - script.wait: set_distance
-              - script.wait: set_latency
-              - script.wait: set_sensitivity
-              - delay: 50ms
-              - script.execute: set_latency
-            else:
-              - delay: 50ms
-              - script.execute: set_latency
-
-  - platform: template
-    name: offlatency
-    id: offlatency # do not change
-    entity_category: config
-    min_value: 1
-    max_value: 600
-    lambda: |-
-      leapmmw(id(uart_bus)).getmmwConf("getLatency");
-      return {};
-    step: 1
-    icon: mdi:home-clock-outline
-    unit_of_measurement: s
-    mode: box
-    set_action:
-      then:
-        - globals.set:
-            id: off_latency_global
-            value: !lambda 'return x;'
+            id: latency_global
+            value: !lambda "return x;"
         - if:
             condition:
               or:
@@ -332,7 +294,7 @@ number:
       then:
         - globals.set:
             id: sensitivity_global
-            value: !lambda 'return x;'
+            value: !lambda "return x;"
         - if:
             condition:
               or:
@@ -379,9 +341,7 @@ button:
 globals:
   - id: distance_global
     type: float
-  - id: on_latency_global
-    type: float
-  - id: off_latency_global
+  - id: latency_global
     type: float
   - id: sensitivity_global
     type: int
@@ -394,7 +354,7 @@ script:
       - uart.write: "setUartOutput 2 1 1 2"
       - delay: 1s
       - uart.write: "saveConfig"
-      - delay: 3s 
+      - delay: 3s
       - uart.write: "sensorStart"
 
   - id: turn_off_mmwave_sensor
@@ -409,10 +369,10 @@ script:
       - delay: 1s
       - lambda: |-
           leapmmw(id(uart_bus)).getmmwConf("getLedMode 1");
-      - delay: 1s 
+      - delay: 1s
       - switch.turn_on: mmwave_sensor
       - delay: 6s # the sum of mmwave_sensor delays
-    
+
   - id: turn_off_led
     then:
       - switch.turn_off: mmwave_sensor
@@ -430,8 +390,8 @@ script:
     then:
       - switch.turn_off: mmwave_sensor
       - delay: 1s
-      - uart.write: !lambda
-          std::string range = "setRange 0 " + str_sprintf("%.2f", id(distance_global));
+      - uart.write:
+          !lambda std::string range = "setRange 0 " + str_sprintf("%.2f", id(distance_global));
           return std::vector<unsigned char>(range.begin(), range.end());
       - delay: 1s
       - switch.turn_on: mmwave_sensor
@@ -442,8 +402,8 @@ script:
     then:
       - switch.turn_off: mmwave_sensor
       - delay: 1s
-      - uart.write: !lambda
-          std::string setL = "setLatency " + str_sprintf("%.0f", id(on_latency_global)) + " " + str_sprintf("%.0f", id(off_latency_global));
+      - uart.write:
+          !lambda std::string setL = "setLatency 0.1 " + str_sprintf("%.0f", id(off_latency_global));
           return std::vector<unsigned char>(setL.begin(), setL.end());
       - delay: 1s
       - switch.turn_on: mmwave_sensor
@@ -454,10 +414,10 @@ script:
     then:
       - switch.turn_off: mmwave_sensor
       - delay: 1s
-      - uart.write: !lambda
-          std::string mss = "setSensitivity " + to_string(id(sensitivity_global));
+      - uart.write:
+          !lambda std::string mss = "setSensitivity " + to_string(id(sensitivity_global));
           return std::vector<unsigned char>(mss.begin(), mss.end());
       - delay: 1s
       - switch.turn_on: mmwave_sensor
       - delay: 6s # the sum of mmwave_sensor delays
-      
+
