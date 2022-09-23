@@ -325,7 +325,6 @@ number:
 button:
   - platform: restart
     name: ${friendly_name} Restart
-    id: restart
     entity_category: diagnostic
     icon: mdi:restart
     on_press:
