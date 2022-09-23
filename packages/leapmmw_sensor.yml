@@ -362,7 +362,7 @@ text_sensor:
   - platform: template
     name: "${friendly_name} Model"
     lambda: return {"${device_model}"};
-    id: ${hass_id}_model
+    id: device_model
     icon: "mdi:tag"
     entity_category: diagnostic
 
