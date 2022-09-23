@@ -4,7 +4,7 @@
 void publishTarget(std::string idx, float dist, float snr) {
   auto get_sensors = App.get_sensors();
   for(int i = 0; i < get_sensors.size(); i++) {
-    auto name = get_sensors[i]->get_id();
+    auto name = get_sensors[i]->get_name();
     auto target = "target_" + to_string(idx);
     if(name.size() > 10 && name.substr(0, 8) == target) {
       if(name.substr(9, 3) == "dis") {
@@ -31,7 +31,7 @@ class leapmmw : public Component, public UARTDevice {
   void publishNumber (std::string sensor, float resp) {
     auto get_numbers = App.get_numbers();
     for(int i = 0; i < get_numbers.size(); i++) {
-      auto name = get_numbers[i]->get_id();
+      auto name = get_numbers[i]->get_name();
       if(name.size() > 6 && name == sensor) {
         get_numbers[i]->publish_state(resp);
       }
